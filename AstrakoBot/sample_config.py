@@ -30,8 +30,7 @@ class Config(object):
     ALLOW_CHATS = True
 
     # RECOMMENDED
-    SQLALCHEMY_DATABASE_URI = "something://somewhat:user@hosturl:port/databasename"  # needed for any database modules
-    DB_NAME = "databasename"  # needed for cron_jobs module, use same databasename from SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_DATABASE_URI = "something://somewhat:user@hosturl:port/databasename"  # needed for any database modules 
     LOAD = []
     NO_LOAD = ["rss", "cleaner", "connection", "math"]
     WEBHOOK = False
@@ -71,7 +70,6 @@ class Config(object):
     BL_CHATS = []  # List of groups that you want blacklisted.
     SPAMMERS = None
     
-    BACKUP_PASS = "12345" # The password used for the cron backups zip
 
 class Production(Config):
     LOGGER = True
