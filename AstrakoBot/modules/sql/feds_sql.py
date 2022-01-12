@@ -3,7 +3,7 @@ import threading
 
 from AstrakoBot import dispatcher
 from AstrakoBot.modules.sql import BASE, SESSION
-from sqlalchemy import Boolean, Column, Integer, BigInteger, String, UnicodeText
+from sqlalchemy import Boolean, Column, Integer, BIGINT, String, UnicodeText
 from telegram.error import BadRequest, Unauthorized
 
 
@@ -59,7 +59,7 @@ class BansF(BASE):
 
 class FedsUserSettings(BASE):
     __tablename__ = "feds_settings"
-    user_id = Column(BigInteger, primary_key=True)
+    user_id = Column(BIGINT, primary_key=True)
     should_report = Column(Boolean, default=True)
 
     def __init__(self, user_id):
