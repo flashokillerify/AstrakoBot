@@ -4,7 +4,7 @@ from typing import Union
 
 from AstrakoBot.modules.helper_funcs.msg_types import Types
 from AstrakoBot.modules.sql import BASE, SESSION
-from sqlalchemy import BigInteger, Boolean, Column, Integer, String, UnicodeText
+from sqlalchemy import BigInteger, Boolean, Column, Integer, String, UnicodeText, BIGINT
 
 DEFAULT_WELCOME = "Hey {first}, how are you?"
 DEFAULT_GOODBYE = "Nice knowing ya!"
@@ -295,7 +295,7 @@ class WelcomeMute(BASE):
 
 class WelcomeMuteUsers(BASE):
     __tablename__ = "human_checks"
-    user_id = Column(BigInteger, primary_key=True)
+    user_id = Column(BIGINT, primary_key=True)
     chat_id = Column(String(14), primary_key=True)
     human_check = Column(Boolean)
 
@@ -442,7 +442,6 @@ def set_welc_preference(chat_id, should_welcome):
             curr = Welcome(str(chat_id), should_welcome=should_welcome)
         else:
             curr.should_welcome = should_welcome
-
         SESSION.add(curr)
         SESSION.commit()
 
@@ -454,7 +453,6 @@ def set_gdbye_preference(chat_id, should_goodbye):
             curr = Welcome(str(chat_id), should_goodbye=should_goodbye)
         else:
             curr.should_goodbye = should_goodbye
-
         SESSION.add(curr)
         SESSION.commit()
 
