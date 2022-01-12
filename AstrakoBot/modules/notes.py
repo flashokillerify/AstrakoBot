@@ -81,13 +81,12 @@ def get(update: Update, context: CallbackContext, notename, show_none=True, no_f
                     )
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
-                        message.reply_text(
-                            "This message seems to have been lost - I'll remove it "
-                            "from your notes list."
-                        )
-                        sql.rm_note(note_chat_id, notename)
-                    else:
                         raise
+                    message.reply_text(
+                        "This message seems to have been lost - I'll remove it "
+                        "from your notes list."
+                    )
+                    sql.rm_note(note_chat_id, notename)
             else:
                 try:
                     bot.forward_message(
@@ -95,15 +94,14 @@ def get(update: Update, context: CallbackContext, notename, show_none=True, no_f
                     )
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
-                        message.reply_text(
-                            "Looks like the original sender of this note has deleted "
-                            "their message - sorry! Get your bot admin to start using a "
-                            "message dump to avoid this. I'll remove this note from "
-                            "your saved notes."
-                        )
-                        sql.rm_note(note_chat_id, notename)
-                    else:
                         raise
+                    message.reply_text(
+                        "Looks like the original sender of this note has deleted "
+                        "their message - sorry! Get your bot admin to start using a "
+                        "message dump to avoid this. I'll remove this note from "
+                        "your saved notes."
+                    )
+                    sql.rm_note(note_chat_id, notename)
         else:
             VALID_NOTE_FORMATTERS = [
                 "first",
@@ -309,7 +307,10 @@ def slash_get(update: Update, context: CallbackContext):
 def save(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     msg = update.effective_message  # type: Optional[Message]
-
+    m = msg.text.split(' ', 1)
+    if len(m) == 1:
+        msg.reply_text("Provide something to save")
+        return
     note_name, text, data_type, content, buttons = get_note_type(msg)
     note_name = note_name.lower()
     if data_type is None:
