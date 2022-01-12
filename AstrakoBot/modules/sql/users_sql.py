@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     BigInteger,
+    BIGINT,
     String,
     UnicodeText,
     UniqueConstraint,
@@ -16,7 +17,7 @@ from sqlalchemy import (
 
 class Users(BASE):
     __tablename__ = "users"
-    user_id = Column(BigInteger, primary_key=True)
+    user_id = Column(BIGINT, primary_key=True)
     username = Column(UnicodeText)
 
     def __init__(self, user_id, username=None):
