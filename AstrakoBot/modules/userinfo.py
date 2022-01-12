@@ -3,6 +3,7 @@ import re
 import os
 import requests
 
+from telegram.user import User
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import ChannelParticipantsAdmins
 from telethon import events
@@ -34,7 +35,6 @@ from AstrakoBot.modules.helper_funcs.chat_status import sudo_plus
 from AstrakoBot.modules.helper_funcs.extraction import extract_user
 from AstrakoBot.modules.helper_funcs.misc import delete
 from AstrakoBot import telethn as AstrakoBotTelethonClient, SUDO_USERS, SUPPORT_USERS
-
 
 def get_id(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
@@ -131,11 +131,27 @@ def info(update: Update, context: CallbackContext):
     chat = update.effective_chat
     user_id = extract_user(update.effective_message, args)
 
-    if user_id:
+    if user_id and int(user_id) != 777000 and int(user_id) != 1087968824:
         user = bot.get_chat(user_id)
 
+    elif user_id and int(user_id) == 777000:
+        message.reply_text(
+            "This is Telegram. Unless you manually entered this reserved account's ID, it is likely a old broadcast from a linked channel."
+        )
+        return
+        
+    elif user_id and int(user_id) == 1087968824:
+        message.reply_text(
+            "This is Group Anonymous Bot. Unless you manually entered this reserved account's ID, it is likely a broadcast from a linked channel or anonymously sent message."
+        )
+        return
+
     elif not message.reply_to_message and not args:
-        user = message.from_user
+        user = (
+            message.sender_chat
+            if message.sender_chat is not None
+            else message.from_user
+        )
 
     elif not message.reply_to_message and (
         not args
@@ -157,127 +173,162 @@ def info(update: Update, context: CallbackContext):
 
     else:
         return
+        
+    rep = message.reply_text("<code>Appraising...</code>", parse_mode=ParseMode.HTML)  
+     
+    if hasattr(user, 'type') and user.type != "private":
+        text = (
+            f"<b>Chat Info: </b>"
+            f"\nID: <code>{user.id}</code>"
+            f"\nTitle: {user.title}"
+        )
+        if user.username:
+            text += f"\nUsername: @{html.escape(user.username)}"
+        text += f"\nChat Type: {user.type.capitalize()}"
+        
+        if INFOPIC:
+            try:
+                profile = bot.getChat(user.id).photo
+                _file = bot.get_file(profile["big_file_id"])
+                _file.download(f"{user.id}.png")
 
-    rep = message.reply_text("<code>Appraising...</code>", parse_mode=ParseMode.HTML)
+                delmsg = message.reply_document(
+                    document=open(f"{user.id}.png", "rb"),
+                    caption=(text),
+                    parse_mode=ParseMode.HTML,
+                )
 
-    text = (
-        f"<b>User info:</b>\n"
-        f"ID: <code>{user.id}</code>\n"
-        f"First Name: {html.escape(user.first_name)}"
-    )
+                os.remove(f"{user.id}.png")
+            # Incase chat don't have profile pic, send normal text
+            except:
+                delmsg = message.reply_text(
+                    text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+                )
 
-    if user.last_name:
-        text += f"\nLast Name: {html.escape(user.last_name)}"
-
-    if user.username:
-        text += f"\nUsername: @{html.escape(user.username)}"
-
-    text += f"\nPermalink: {mention_html(user.id, 'link')}"
-
-    if chat.type != "private" and user_id != bot.id:
-        _stext = "\nPresence: <code>{}</code>"
-
-        afk_st = is_afk(user.id)
-        if afk_st:
-            text += _stext.format("AFK")
         else:
-            status = status = bot.get_chat_member(chat.id, user.id).status
-            if status:
-                if status == "left":
-                    text += _stext.format("Not here")
-                if status == "kicked":
-                    text += _stext.format("Banned")
-                elif status == "member":
-                    text += _stext.format("Detected")
-                elif status in {"administrator", "creator"}:
-                    text += _stext.format("Admin")
-
-    try:
-        spamwtc = sw.get_ban(int(user.id))
-        if spamwtc:
-            text += "\n\n<b>This person is Spamwatched!</b>"
-            text += f"\nReason: <pre>{spamwtc.reason}</pre>"
-            text += "\nAppeal at @SpamWatchSupport"
-        else:
-            pass
-    except:
-        pass  # don't crash if api is down somehow...
-
-    disaster_level_present = False
-
-    if user.id == OWNER_ID:
-        text += "\n\nUser level: <b>god</b>"
-        disaster_level_present = True
-    elif user.id in DEV_USERS:
-        text += "\n\nUser level: <b>developer</b>"
-        disaster_level_present = True
-    elif user.id in SUDO_USERS:
-        text += "\n\nUser level: <b>sudo</b>"
-        disaster_level_present = True
-    elif user.id in SUPPORT_USERS:
-        text += "\n\nUser level: <b>support</b>"
-        disaster_level_present = True
-    elif user.id in WHITELIST_USERS:
-        text += "\n\nUser level: <b>whitelist</b>"
-        disaster_level_present = True
-
-    # if disaster_level_present:
-    #     text += ' [<a href="https://t.me/OnePunchUpdates/155">?</a>]'.format(
-    #         bot.username)
-
-    try:
-        user_member = chat.get_member(user.id)
-        if user_member.status == "administrator":
-            result = requests.post(
-                f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id={chat.id}&user_id={user.id}"
-            )
-            result = result.json()["result"]
-            if "custom_title" in result.keys():
-                custom_title = result["custom_title"]
-                text += f"\n\nTitle:\n<b>{custom_title}</b>"
-    except BadRequest:
-        pass
-
-    for mod in USER_INFO:
-        try:
-            mod_info = mod.__user_info__(user.id).strip()
-        except TypeError:
-            mod_info = mod.__user_info__(user.id, chat.id).strip()
-        if mod_info:
-            text += "\n\n" + mod_info
-
-    if INFOPIC:
-        try:
-            profile = context.bot.get_user_profile_photos(user.id).photos[0][-1]
-            _file = bot.get_file(profile["file_id"])
-            _file.download(f"{user.id}.png")
-
-            delmsg = message.reply_document(
-                document=open(f"{user.id}.png", "rb"),
-                caption=(text),
-                parse_mode=ParseMode.HTML,
-            )
-
-            os.remove(f"{user.id}.png")
-        # Incase user don't have profile pic, send normal text
-        except IndexError:
             delmsg = message.reply_text(
                 text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
             )
 
     else:
-        delmsg = message.reply_text(
-            text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+        text = (
+            f"<b>User info:</b>\n"
+            f"ID: <code>{user.id}</code>\n"
+            f"First Name: {mention_html(user.id, user.first_name or 'None')}"
         )
 
-    rep.delete()
+        if user.last_name:
+            text += f"\nLast Name: {html.escape(user.last_name)}"
 
+        if user.username:
+            text += f"\nUsername: @{html.escape(user.username)}"
 
-    cleartime = get_clearcmd(chat.id, "info")
+        text += f"\nPermalink: {mention_html(user.id, 'link')}"
+
+        if chat.type != "private" and user_id != bot.id:
+            _stext = "\nPresence: <code>{}</code>"
+
+            afk_st = is_afk(user.id)
+            if afk_st:
+                text += _stext.format("AFK")
+            else:
+                status = bot.get_chat_member(chat.id, user.id).status
+                if status:
+                    if status == "left":
+                        text += _stext.format("Not here")
+                    if status == "kicked":
+                        text += _stext.format("Banned")
+                    elif status == "member":
+                        text += _stext.format("Detected")
+                    elif status in {"administrator", "creator"}:
+                        text += _stext.format("Admin")
+
+        try:
+            spamwtc = sw.get_ban(int(user.id))
+            if spamwtc:
+                text += "\n\n<b>This person is Spamwatched!</b>"
+                text += f"\nReason: <pre>{spamwtc.reason}</pre>"
+                text += "\nAppeal at @SpamWatchSupport"
+            else:
+                pass
+        except:
+            pass  # don't crash if api is down somehow...
+
+        disaster_level_present = False
+
+        if user.id == OWNER_ID:
+            text += "\n\nUser level: <b>god</b>"
+            disaster_level_present = True
+        elif user.id in DEV_USERS:
+            text += "\n\nUser level: <b>developer</b>"
+            disaster_level_present = True
+        elif user.id in SUDO_USERS:
+            text += "\n\nUser level: <b>sudo</b>"
+            disaster_level_present = True
+        elif user.id in SUPPORT_USERS:
+            text += "\n\nUser level: <b>support</b>"
+            disaster_level_present = True
+        elif user.id in WHITELIST_USERS:
+            text += "\n\nUser level: <b>whitelist</b>"
+            disaster_level_present = True
+
+        # if disaster_level_present:
+        #     text += ' [<a href="https://t.me/OnePunchUpdates/155">?</a>]'.format(
+        #         bot.username)
+
+        try:
+            user_member = chat.get_member(user.id)
+            if user_member.status == "administrator":
+                result = requests.post(
+                    f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id={chat.id}&user_id={user.id}"
+                )
+                result = result.json()["result"]
+                if "custom_title" in result.keys():
+                    custom_title = result["custom_title"]
+                    text += f"\n\nTitle:\n<b>{custom_title}</b>"
+        except BadRequest:
+            pass
+
+        for mod in USER_INFO:
+            try:
+                mod_info = mod.__user_info__(user.id).strip()
+            except TypeError:
+                mod_info = mod.__user_info__(user.id, chat.id).strip()
+            if mod_info:
+                text += "\n\n" + mod_info
+
+        text += "\n\n" + biome(user.id)
+
+        if INFOPIC:
+            try:
+                profile = context.bot.get_user_profile_photos(user.id).photos[0][-1]
+                _file = bot.get_file(profile["file_id"])
+                _file.download(f"{user.id}.png")
+
+                delmsg = message.reply_document(
+                    document=open(f"{user.id}.png", "rb"),
+                    caption=(text),
+                    parse_mode=ParseMode.HTML,
+                )
+
+                os.remove(f"{user.id}.png")
+            # Incase user don't have profile pic, send normal text
+            except IndexError:
+                delmsg = message.reply_text(
+                    text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+                )
+
+        else:
+            delmsg = message.reply_text(
+                text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+            )    
     
+    rep.delete()
+              
+    cleartime = get_clearcmd(chat.id, "info")
+        
     if cleartime:
         context.dispatcher.run_async(delete, delmsg, cleartime.time)
-
 
 def about_me(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
@@ -434,7 +485,7 @@ def gdpr(update: Update, context: CallbackContext):
                                         parse_mode=ParseMode.MARKDOWN)
 
 
-def __user_info__(user_id):
+def biome(user_id):
     bio = html.escape(sql.get_user_bio(user_id) or "")
     me = html.escape(sql.get_user_me_info(user_id) or "")
     result = ""
@@ -478,7 +529,7 @@ Examples:
 """
 
 SET_BIO_HANDLER = DisableAbleCommandHandler("setbio", set_about_bio, run_async=True)
-GET_BIO_HANDLER = DisableAbleCommandHandler("bio", about_bio)
+GET_BIO_HANDLER = DisableAbleCommandHandler("bio", about_bio, run_async=True)
 
 STATS_HANDLER = CommandHandler("stats", stats, run_async=True)
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, run_async=True)
