@@ -260,32 +260,20 @@ def new_member(update: Update, context: CallbackContext):
 
             # Welcome yourself
             elif new_mem.id == bot.id:
-                creator = None
-                for x in bot.bot.get_chat_administrators(update.effective_chat.id):
-                    if x.status == "creator":
-                        creator = x.user
-                        break
-                if creator:
-                    bot.send_message(
-                        JOIN_LOGGER,
-                        "#NEW_GROUP\n<b>Group name:</b> {}\n<b>ID:</b> <code>{}</code>\n<b>Creator:</b> <code>{}</code>".format(
-                            html.escape(chat.title), chat.id, html.escape(creator)
-                        ),
-                        parse_mode=ParseMode.HTML,
-                    )
-                else:
-                    bot.send_message(
-                        JOIN_LOGGER,
-                        "#NEW_GROUP\n<b>Group name:</b> {}\n<b>ID:</b> <code>{}</code>".format(
-                            html.escape(chat.title), chat.id
-                        ),
-                        parse_mode=ParseMode.HTML,
-                    )
                 update.effective_message.reply_text(
-                    "Hello everybody!", reply_to_message_id=reply
+                    "Thanks for adding me! Join https://t.me/AstrakoBotSupport for support.",
+                    reply_to_message_id=reply,
+                    disable_web_page_preview=True,
+                )
+                
+                bot.send_message(
+                    JOIN_LOGGER,
+                    "#NEW_GROUP\n<b>Group name:</b> {}\n<b>ID:</b> <code>{}</code>".format(
+                        html.escape(chat.title), chat.id
+                    ),
+                    parse_mode=ParseMode.HTML,
                 )
                 continue
-
             else:
                 buttons = sql.get_welc_buttons(chat.id)
                 keyb = build_keyboard(buttons)
