@@ -74,7 +74,7 @@ def get_readable_time(seconds: int) -> str:
 
 PM_START_TEXT = """
 Hi {}, my name is {}! 
-I am a modular group management bot.
+I am a modular group management bot for helping and survival purposes.
 
 You can find my list of available commands with /help.
 """
@@ -98,7 +98,7 @@ And the following:
     "" if not ALLOW_EXCL else "\nAll commands can either be used with / or !.\n",
 )
 
-ASTRAKOBOT_IMG = "https://telegra.ph/file/0071fff71097dd52fc510.jpg"
+ASTRAKOBOT_IMG = "https://telegra.ph/file/2c53a71e19a6b18f08723.jpg"
 
 DONATE_STRING = """Heya, glad to hear you want to donate!
 AstrakoBot is hosted on its own server and doesn't require any donations as of now but \
@@ -222,7 +222,7 @@ def start(update: Update, context: CallbackContext):
                     [
                         [
                             InlineKeyboardButton(
-                                text="Add Sassuke to your group",
+                                text="Add Survivor to your group",
                                 url="t.me/{}?startgroup=true".format(
                                     context.bot.username
                                 ),
@@ -236,18 +236,6 @@ def start(update: Update, context: CallbackContext):
                         ],
                         [
                             InlineKeyboardButton(
-                                text="Getting started guide",
-                                url="https://t.me/OnePunchUpdates/29",
-                            )
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                text="Source code",
-                                url="https://github.com/flashokillerify/Noha_XX",
-                            )
-                        ],
-                        [
-                            InlineKeyboardButton(
                                 text="Recommended federation",
                                 url="https://t.me/firexsquad",
                             )
@@ -257,7 +245,7 @@ def start(update: Update, context: CallbackContext):
             )
     else:
         update.effective_message.reply_text(
-            "I'm awake already!\n<b>Haven't died since:</b> <code>{}</code>".format(
+            "I'm awake already!\n<b>Haven't slept since:</b> <code>{}</code>".format(
                 uptime
             ),
             parse_mode=ParseMode.HTML,
