@@ -30,7 +30,7 @@ class Config(object):
     ALLOW_CHATS = True
 
     # RECOMMENDED
-    SQLALCHEMY_DATABASE_URI = "postgresql://obitdnvz:yfrTUzuPQi0QxN6JYT8TevQd80erqiT5@satao.db.elephantsql.com/obitdnvz"  # needed for any database modules 
+    SQLALCHEMY_DATABASE_URI = ""  # needed for any database modules 
     LOAD = []
     NO_LOAD = ["rss", "cleaner", "connection", "math"]
     WEBHOOK = False
