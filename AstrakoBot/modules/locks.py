@@ -1,5 +1,6 @@
 import html
 
+import telegram.ext as tg
 from telegram import Message, Chat, ParseMode, MessageEntity, Update
 from telegram import TelegramError, ChatPermissions
 from telegram.error import BadRequest
@@ -23,6 +24,7 @@ from AstrakoBot.modules.log_channel import loggable
 from AstrakoBot.modules.connection import connected
 from AstrakoBot.modules.sql.approve_sql import is_approved
 from AstrakoBot.modules.helper_funcs.alternate import send_message, typing_action
+from AstrakoBot.modules.helper_funcs.filters import CustomFilters
 
 ad = AlphabetDetector()
 
@@ -40,6 +42,7 @@ LOCK_TYPES = {
     "game": Filters.game,
     "location": Filters.location,
     "egame": Filters.dice,
+    "anonchannel": CustomFilters.is_anon_channel,
     "rtl": "rtl",
     "button": "button",
     "inline": "inline",
@@ -93,6 +96,25 @@ PERM_GROUP = 1
 REST_GROUP = 2
 
 
+class CustomCommandHandler(tg.CommandHandler):
+    def __init__(self, command, callback, **kwargs):
+        super().__init__(command, callback, **kwargs)
+
+    def check_update(self, update):
+        if super().check_update(update) and not (
+                sql.is_restr_locked(update.effective_chat.id, 'messages') and not is_user_admin(update.effective_chat,
+                                                                                                update.effective_user.id)):
+            args = update.effective_message.text.split()[1:]
+            filter_result = self.filters(update)
+            if filter_result:
+                return args, filter_result
+            else:
+                return False
+
+
+CommandHandler = CustomCommandHandler
+
+
 # NOT ASYNC
 def restr_members(
     bot, chat_id, members, messages=False, media=False, other=False, previews=False
@@ -100,15 +122,18 @@ def restr_members(
     for mem in members:
         if mem.user in SUDO_USERS:
             pass
+        elif mem.user == 777000 or mem.user == 1087968824:
+             pass
         try:
             bot.restrict_chat_member(
                 chat_id,
                 mem.user,
+                permissions=ChatPermissions(
                 can_send_messages=messages,
                 can_send_media_messages=media,
                 can_send_other_messages=other,
                 can_add_web_page_previews=previews,
-            )
+            ))
         except TelegramError:
             pass
 
@@ -217,6 +242,18 @@ def lock(update: Update, context: CallbackContext) -> str:
                         LOCK_CHAT_RESTRICTION[ltype.lower()],
                     ),
                 )
+
+                context.bot.restrict_chat_member(chat.id, int(777000), permissions=ChatPermissions(
+                    can_send_messages=True,
+                    can_send_media_messages=True,
+                    can_send_other_messages=True,
+                    can_add_web_page_previews=True))
+
+                context.bot.restrict_chat_member(chat.id, int(1087968824), permissions=ChatPermissions(
+                    can_send_messages=True,
+                    can_send_media_messages=True,
+                    can_send_other_messages=True,
+                    can_add_web_page_previews=True))
 
                 send_message(update.effective_message, text, parse_mode="markdown")
                 return (
@@ -426,7 +463,7 @@ def del_lockables(update: Update, context: CallbackContext):
                             )
                             return
 
-                        chat.kick_member(new_mem.id)
+                        chat.ban_member(new_mem.id)
                         send_message(
                             update.effective_message,
                             "Only admins are allowed to add bots in this chat! Get outta here.",
@@ -469,6 +506,7 @@ def build_lock_message(chat_id):
             locklist.append("button = `{}`".format(locks.button))
             locklist.append("egame = `{}`".format(locks.egame))
             locklist.append("inline = `{}`".format(locks.inline))
+            locklist.append("anonchannel = `{}`".format(locks.anonchannel))
     permissions = dispatcher.bot.get_chat(chat_id).permissions
     permslist.append("messages = `{}`".format(permissions.can_send_messages))
     permslist.append("media = `{}`".format(permissions.can_send_media_messages))

@@ -147,7 +147,6 @@ else:
     SPAMWATCH_API = Config.SPAMWATCH_API
     INFOPIC = Config.INFOPIC
     WEATHER_API = Config.WEATHER_API
-    BACKUP_PASS = Config.BACKUP_PASS
 
     try:
         BL_CHATS = set(int(x) for x in Config.BL_CHATS or [])
