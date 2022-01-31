@@ -15,12 +15,12 @@ class Config(object):
     # REQUIRED
     # Login to https://my.telegram.org and fill in these slots with the details given by it
 
-    API_ID = 123456  # integer value, dont use ""
-    API_HASH = "awoo"
-    TOKEN = "BOT_TOKEN"  # This var used to be API_KEY but it is now TOKEN, adjust accordingly.
-    OWNER_ID = 123456789  # If you dont know, run the bot and do /id in your private chat with it, also an integer
-    OWNER_USERNAME = "awoo"
-    SUPPORT_CHAT = "awoo"  # Your own group for support, do not add the @
+    API_ID = awooooo  # integer value, dont use ""
+    API_HASH = "give me api"
+    TOKEN = "696969:abcde"  # This var used to be API_KEY but it is now TOKEN, adjust accordingly.
+    OWNER_ID = 5093460260 # If you dont know, run the bot and do /id in your private chat with it, also an integer
+    OWNER_USERNAME = "darknessSkynet"
+    SUPPORT_CHAT = "revenxsupport"  # Your own group for support, do not add the @
     JOIN_LOGGER = (
         -1234567890123
     )  # Prints any new group the bot is added to, prints just the name and ID.
@@ -30,7 +30,7 @@ class Config(object):
     ALLOW_CHATS = True
 
     # RECOMMENDED
-    SQLALCHEMY_DATABASE_URI = "something://somewhat:user@hosturl:port/databasename"  # needed for any database modules 
+    SQLALCHEMY_DATABASE_URI = "postgresql://obitdnvz:yfrTUzuPQi0QxN6JYT8TevQd80erqiT5@satao.db.elephantsql.com/obitdnvz"  # needed for any database modules 
     LOAD = []
     NO_LOAD = ["rss", "cleaner", "connection", "math"]
     WEBHOOK = False
