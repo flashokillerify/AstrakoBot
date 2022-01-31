@@ -42,7 +42,7 @@ LOCK_TYPES = {
     "game": Filters.game,
     "location": Filters.location,
     "egame": Filters.dice,
-    "anonchannel": CustomFilters.is_anon_channel,
+    "anonchannel": Filters.sender_chat.channel,
     "rtl": "rtl",
     "button": "button",
     "inline": "inline",
