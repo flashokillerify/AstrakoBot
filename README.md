@@ -1,5 +1,5 @@
 ![AstrakoBot](https://i.imgur.com/1oah5E2.jpg)
-# AstrakoBot 
+# AstrakoBot ..
 <p align="center">
 <a href="https://www.codacy.com/gh/Astrako/AstrakoBot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Astrako/AstrakoBot&amp;utm_campaign=Badge_Grade" alt="Codacy Badge">
 <img src="https://app.codacy.com/project/badge/Grade/972e73015aaa4096bf109a79acae8afb" /> </a>
